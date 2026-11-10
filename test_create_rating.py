@@ -20,6 +20,7 @@ def test_stars_out_of_range(api, auth, pizza_id, stars):
     assert res.status_code == 400
     assert res.json() == {"error": STARS_ERROR}
 
+
 # C2: stars that are not a whole number are refused with a type error.
 @pytest.mark.parametrize(
     "stars, message",

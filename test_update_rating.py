@@ -1,6 +1,6 @@
 import pytest
 
-# Boundary values: 1 and 5 stars are ถูก, 0 and 6 are ผิด,
+# Stars 1 and 5 are saved with 200, stars 0 and 6 are refused with 400 and leave the rating unchanged.
 @pytest.mark.parametrize(
     "stars, expected_status",
     [(0, 400), (1, 200), (5, 200), (6, 400)],
