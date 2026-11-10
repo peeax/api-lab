@@ -19,3 +19,49 @@ def test_stars_out_of_range(api, auth, pizza_id, stars):
     res = api.post("/api/ratings", json=new, headers=auth)
     assert res.status_code == 400
     assert res.json() == {"error": STARS_ERROR}
+
+# C2: stars that are not a whole number are refused with a type error.
+@pytest.mark.parametrize(
+    "stars, message",
+    [
+        (3.5, "json: cannot unmarshal number 3.5 into Go struct field "
+              "Rating.stars of type int"),
+        ("3", "json: cannot unmarshal string into Go struct field "
+              "Rating.stars of type int"),
+    ],
+    ids=["decimal", "text"],
+)
+def test_stars_wrong_type(api, auth, pizza_id, stars, message):
+    new = {"pizza_id": pizza_id, "stars": stars}
+    res = api.post("/api/ratings", json=new, headers=auth)
+    assert res.status_code == 400
+    assert res.json() == {"error": message}
+
+
+# C2: a rating without the stars field is refused with the range message.
+def test_stars_missing(api, auth, pizza_id):
+    new = {"pizza_id": pizza_id}
+    res = api.post("/api/ratings", json=new, headers=auth)
+    assert res.status_code == 400
+    assert res.json() == {"error": STARS_ERROR}
+
+
+# C3: a rating for a pizza that does not exist is refused.
+def test_pizza_does_not_exist(api, auth):
+    new = {"pizza_id": 999999999, "stars": 3}
+    res = api.post("/api/ratings", json=new, headers=auth)
+    assert res.status_code == 400
+    assert res.json() == {"error": "pizza ID 999999999 not found"}
+
+
+# C4: a rating with no token or a token of the wrong length is refused.
+@pytest.mark.parametrize(
+    "headers",
+    [{}, {"Authorization": "token short"}],
+    ids=["no_token", "wrong_length"],
+)
+def test_token_not_valid(api, pizza_id, headers):
+    new = {"pizza_id": pizza_id, "stars": 3}
+    res = api.post("/api/ratings", json=new, headers=headers)
+    assert res.status_code == 401
+    assert res.json() == {"error": "authentication failed"}
