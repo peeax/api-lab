@@ -7,7 +7,7 @@ def new_user():
     return {"username": name, "password": "Pizza-2026"}
 
 
-# มี username อยุ่แล้ว refused with 400.
+# A second user with a name that is already taken is refused with 400.
 def test_taken_username_is_refused(api):
     user = new_user()
     res = api.post("/api/users", json=user)
@@ -17,7 +17,7 @@ def test_taken_username_is_refused(api):
     assert res.json() == {"error": "username already taken"}
 
 
-# password ผิด refused with 401.
+# Logging in with a wrong password is refused with 401.
 def test_wrong_password_is_refused(api):
     user = new_user()
     res = api.post("/api/users", json=user)
@@ -28,7 +28,7 @@ def test_wrong_password_is_refused(api):
     assert res.json() == {"error": "authentication failed"}
 
 
-# ไม่มี name refused with 400.
+# A user with an empty name is refused with 400.
 def test_empty_username_is_refused(api):
     user = {"username": "", "password": "Pizza-2026"}
     res = api.post("/api/users", json=user)
